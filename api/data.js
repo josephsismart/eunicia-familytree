@@ -17,7 +17,7 @@ export default async function handler(req, res) {
       const dataBlob = blobs.find(b => b.pathname === 'familytree-data.json') || blobs.find(b => b.pathname.includes('family'));
 
       if (dataBlob) {
-        const response = await fetch(dataBlob.url);
+        const response = await fetch(dataBlob.url + '?ts=' + Date.now(), { cache: 'no-store' });
         const data = await response.json();
         return res.status(200).json(data);
       }
@@ -32,6 +32,7 @@ export default async function handler(req, res) {
       const blob = await put('familytree-data.json', JSON.stringify(data), {
         access: 'public',
         addRandomSuffix: false,
+        cacheControlMaxAge: 0,
       });
 
       return res.status(200).json(data);
