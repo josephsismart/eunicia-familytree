@@ -213,6 +213,42 @@
     z-index: 1;
   }
 
+  /* "Wishlist done" indicator — glowing ring + green check */
+  .done-check {
+    position: absolute;
+    top: -4px;
+    right: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #2ecc71;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 18px;
+    text-align: center;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    z-index: 12;
+    display: none;
+    pointer-events: none;
+  }
+  .is-done .done-check { display: block; }
+  .ornament-wrap.is-done .ornament {
+    border-color: var(--star-gold) !important;
+    box-shadow: 0 0 10px 2px rgba(255,215,0,0.9), 0 0 18px 4px rgba(255,215,0,0.5);
+    animation: doneGlow 1.8s ease-in-out infinite;
+  }
+  .gift-box.is-done .gift-body {
+    box-shadow: 0 0 10px 2px rgba(255,215,0,0.9), 0 0 18px 4px rgba(255,215,0,0.5);
+    animation: doneGlow 1.8s ease-in-out infinite;
+  }
+  @keyframes doneGlow {
+    0%, 100% { box-shadow: 0 0 8px 2px rgba(255,215,0,0.7), 0 0 14px 3px rgba(255,215,0,0.35); }
+    50% { box-shadow: 0 0 14px 4px rgba(255,215,0,1), 0 0 26px 7px rgba(255,215,0,0.6); }
+  }
+  .gift-box .done-check { top: -6px; right: 0; }
+
   /* Ornament (face ball) */
   .ornament {
     width: 52px;
@@ -585,7 +621,7 @@
 
   <div class="page-header">
     <h1>🎄 Obeña Family Christmas Wishlist</h1>
-    <p>Tap a face to view & edit their wishlist!</p>
+    <p>Tap a face to view & edit their wishlist! ✨ Glowing + ✓ = wishlist ready</p>
   </div>
 
   <div class="tree-scene">
@@ -654,7 +690,8 @@
       }
     }
     flatten(data.members || []);
-    members = flat; // ALL members — those without photos get cute avatars
+    // Obeña family only (the other clan was added as a later batch with higher IDs)
+    members = flat.filter(m => Number(m.id) < 1785900000000);
   } catch(e) {
     console.error('Failed to load family data:', e);
   }
@@ -718,6 +755,27 @@
     if (wRes.ok) wishlists = normalize(await wRes.json());
   } catch(e) { console.error('Failed to load wishlists:', e); }
 
+  // ---- "Wishlist done" indicator (glowing ring + check) ----
+  const doneEls = {}; // memberId -> the ornament/gift element to toggle
+  function isDone(id) { return !!(wishlists[id] && wishlists[id].length > 0); }
+  function makeCheck() {
+    const c = document.createElement('div');
+    c.className = 'done-check';
+    c.textContent = '✓';
+    c.title = 'Wishlist ready!';
+    return c;
+  }
+  function applyDone(id) {
+    const el = doneEls[id];
+    if (!el) return;
+    el.classList.toggle('is-done', isDone(id));
+  }
+  function registerDone(id, el) {
+    doneEls[id] = el;
+    el.appendChild(makeCheck());
+    applyDone(id);
+  }
+
   // Shuffle members for placement
   const shuffled = [...members].sort(() => Math.random() - 0.5);
 
@@ -762,6 +820,7 @@
       wrap.appendChild(orb);
       wrap.appendChild(name);
       tier.el.appendChild(wrap);
+      registerDone(m.id, wrap);
     }
   });
 
@@ -790,6 +849,7 @@
     img.loading = 'lazy';
     face.appendChild(img);
     body.appendChild(face);
+    registerDone(m.id, box);
 
     const bow = document.createElement('div');
     bow.className = 'gift-bow';
@@ -830,6 +890,7 @@
       if (wRes.ok) {
         wishlists = normalize(await wRes.json());
         if (currentMemberId === member.id) renderWishlist();
+        Object.keys(doneEls).forEach(applyDone);
       }
     } catch(e) {}
   }
@@ -880,6 +941,7 @@
     wishlists[currentMemberId].push({ text, id: '' });
     wishInput.value = '';
     renderWishlist();
+    applyDone(currentMemberId);
     try {
       const res = await fetch('/api/wishlist', {
         method: 'POST',
@@ -888,7 +950,7 @@
       });
       if (res.ok) {
         wishlists = normalize(await res.json());
-        if (currentMemberId) renderWishlist();
+        if (currentMemberId) { renderWishlist(); applyDone(currentMemberId); }
       }
     } catch(e) { console.error('Save error:', e); }
   }
@@ -898,6 +960,7 @@
     const items = wishlists[currentMemberId] || [];
     items.splice(index, 1);
     renderWishlist();
+    applyDone(currentMemberId);
     if (!itemId) return;
     try {
       const res = await fetch('/api/wishlist', {
@@ -907,7 +970,7 @@
       });
       if (res.ok) {
         wishlists = normalize(await res.json());
-        if (currentMemberId) renderWishlist();
+        if (currentMemberId) { renderWishlist(); applyDone(currentMemberId); }
       }
     } catch(e) { console.error('Delete error:', e); }
   }
