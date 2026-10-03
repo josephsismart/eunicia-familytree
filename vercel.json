@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/christmas", "destination": "/christmas.html" },
+    { "source": "/((?!api|assets|christmas|favicon|og-).*)", "destination": "/index.html" }
+  ]
+}
