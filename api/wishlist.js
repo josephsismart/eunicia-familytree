@@ -14,7 +14,8 @@ export default async function handler(req, res) {
       const { blobs } = await list();
       const blob = blobs.find(b => b.pathname === BLOB_PATH);
       if (blob) {
-        const response = await fetch(blob.url);
+        // cache-bust: Vercel Blob public URLs are CDN-cached, so append a timestamp for a fresh read
+        const response = await fetch(blob.url + '?ts=' + Date.now(), { cache: 'no-store' });
         return await response.json();
       }
     } catch (e) {}
@@ -25,6 +26,7 @@ export default async function handler(req, res) {
     await put(BLOB_PATH, JSON.stringify(data), {
       access: 'public',
       addRandomSuffix: false,
+      cacheControlMaxAge: 0,
     });
   }
 
