@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Obeña Christmas Wishlist</title>
+</head>
+<body>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Nunito:wght@400;600;700&display=swap');
+
+  :root {
+    --bg: #0a1628;
+    --tree-green: #1a6b3c;
+    --tree-dark: #145230;
+    --star-gold: #ffd700;
+    --ornament-red: #e74c3c;
+    --ornament-blue: #3498db;
+    --ornament-purple: #9b59b6;
+    --ornament-pink: #e91e8f;
+    --snow: #e8f0ff;
+    --text: #f0f4ff;
+    --text-muted: #8a9cc5;
+    --gift-red: #c0392b;
+    --gift-green: #27ae60;
+    --gift-blue: #2980b9;
+    --gift-purple: #8e44ad;
+    --modal-bg: #121e36;
+    --modal-border: #1e3058;
+    --input-bg: #0d1a30;
+    color-scheme: dark;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #e8f4f0;
+      --snow: #ffffff;
+      --text: #1a2a3a;
+      --text-muted: #5a6a7a;
+      --modal-bg: #ffffff;
+      --modal-border: #d0dde8;
+      --input-bg: #f0f5fa;
+      color-scheme: light;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0a1628;
+    --snow: #e8f0ff;
+    --text: #f0f4ff;
+    --text-muted: #8a9cc5;
+    --modal-bg: #121e36;
+    --modal-border: #1e3058;
+    --input-bg: #0d1a30;
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  .page-header {
+    text-align: center;
+    padding: 24px 16px 8px;
+    position: relative;
+    z-index: 10;
+  }
+  .page-header h1 {
+    font-family: 'Mountains of Christmas', cursive;
+    font-size: clamp(28px, 6vw, 48px);
+    color: var(--star-gold);
+    margin: 0;
+    text-shadow: 0 0 20px rgba(255,215,0,0.4);
+    text-wrap: balance;
+  }
+  .page-header p {
+    color: var(--text-muted);
+    margin: 4px 0 0;
+    font-size: 14px;
+  }
+
+  /* Snowfall */
+  .snowfall {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .snowflake {
+    position: absolute;
+    top: -10px;
+    color: white;
+    opacity: 0.6;
+    font-size: 14px;
+    animation: fall linear infinite;
+    user-select: none;
+  }
+  @keyframes fall {
+    to { transform: translateY(110vh) rotate(360deg); }
+  }
+
+  /* Tree scene */
+  .tree-scene {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 0 16px 40px;
+    min-height: 600px;
+  }
+
+  /* Canvas tree */
+  .tree-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Star */
+  .tree-star {
+    font-size: 48px;
+    color: var(--star-gold);
+    text-shadow: 0 0 30px rgba(255,215,0,0.8), 0 0 60px rgba(255,215,0,0.4);
+    animation: starPulse 2s ease-in-out infinite;
+    z-index: 5;
+    margin-bottom: -10px;
+  }
+  @keyframes starPulse {
+    0%, 100% { transform: scale(1); filter: brightness(1); }
+    50% { transform: scale(1.15); filter: brightness(1.3); }
+  }
+
+  /* Tree tiers */
+  .tree-tier {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    position: relative;
+    padding: 8px 0;
+  }
+  .tree-tier::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%; bottom: 0;
+    transform: translateX(-50%);
+    z-index: -1;
+  }
+  .tier-1 { max-width: 120px; }
+  .tier-2 { max-width: 200px; }
+  .tier-3 { max-width: 300px; }
+  .tier-4 { max-width: 400px; }
+  .tier-5 { max-width: 500px; }
+  .tier-6 { max-width: 580px; }
+
+  /* Tree shape using clip-path triangles */
+  .tree-body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .tree-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 30px 20px 16px;
+    position: relative;
+  }
+  .tree-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, var(--tree-green) 0%, var(--tree-dark) 100%);
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .tree-section > * { position: relative; z-index: 1; }
+  .tree-section-1 {
+    width: 180px;
+    min-height: 120px;
+    margin-bottom: -20px;
+    z-index: 4;
+  }
+  .tree-section-2 {
+    width: 280px;
+    min-height: 150px;
+    margin-bottom: -25px;
+    z-index: 3;
+  }
+  .tree-section-3 {
+    width: 400px;
+    min-height: 170px;
+    margin-bottom: -30px;
+    z-index: 2;
+  }
+  .tree-section-4 {
+    width: min(520px, 95vw);
+    min-height: 180px;
+    z-index: 1;
+  }
+
+  /* Ornament (face ball) */
+  .ornament {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 -2px 4px rgba(0,0,0,0.2);
+  }
+  .ornament:hover {
+    transform: scale(1.3);
+    box-shadow: 0 4px 20px rgba(255,215,0,0.5);
+    z-index: 10;
+  }
+  .ornament img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .ornament-hook {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 8px;
+    border: 2px solid var(--star-gold);
+    border-bottom: none;
+    border-radius: 5px 5px 0 0;
+  }
+  .ornament-wrap {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .ornament-name {
+    font-size: 9px;
+    color: var(--snow);
+    text-align: center;
+    margin-top: 2px;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    font-weight: 600;
+  }
+
+  .color-0 { border-color: var(--ornament-red); }
+  .color-1 { border-color: var(--ornament-blue); }
+  .color-2 { border-color: var(--ornament-purple); }
+  .color-3 { border-color: var(--star-gold); }
+  .color-4 { border-color: var(--ornament-pink); }
+
+  /* Trunk */
+  .tree-trunk {
+    width: 50px;
+    height: 40px;
+    background: linear-gradient(90deg, #5a3a1a, #8B5E3C, #5a3a1a);
+    border-radius: 0 0 6px 6px;
+    margin: 0 auto;
+  }
+
+  /* Gifts under tree */
+  .gifts-area {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px 16px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .gift-box {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
+  .gift-box:hover {
+    transform: translateY(-4px) scale(1.05);
+  }
+  .gift-body {
+    width: 64px;
+    height: 48px;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  }
+  .gift-ribbon-v {
+    position: absolute;
+    top: 0; bottom: 0;
+    left: 50%;
+    width: 8px;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,0.3);
+  }
+  .gift-ribbon-h {
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    height: 8px;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.3);
+  }
+  .gift-bow {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 16px;
+  }
+  .gift-face {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.6);
+    z-index: 2;
+  }
+  .gift-face img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .gift-name {
+    font-size: 9px;
+    text-align: center;
+    color: var(--text-muted);
+    margin-top: 4px;
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .gift-color-0 .gift-body { background: var(--gift-red); }
+  .gift-color-1 .gift-body { background: var(--gift-green); }
+  .gift-color-2 .gift-body { background: var(--gift-blue); }
+  .gift-color-3 .gift-body { background: var(--gift-purple); }
+
+  /* Twinkling lights on tree */
+  .tree-lights {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .light-dot {
+    pointer-events: none;
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    animation: twinkle 1.5s ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; box-shadow: 0 0 8px currentColor; }
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay[hidden] { display: none !important; }
+  .modal {
+    background: var(--modal-bg);
+    border: 1px solid var(--modal-border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 420px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 24px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  .modal-close:hover { color: var(--text); background: rgba(255,255,255,0.1); }
+  .modal-photo {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--star-gold);
+    margin: 0 auto 12px;
+    display: block;
+  }
+  .modal h2 {
+    font-family: 'Mountains of Christmas', cursive;
+    text-align: center;
+    margin: 0 0 4px;
+    font-size: 22px;
+    color: var(--star-gold);
+  }
+  .modal h3 {
+    text-align: center;
+    margin: 0 0 20px;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .wishlist-items {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .wish-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--input-bg);
+    border-radius: 10px;
+    border: 1px solid var(--modal-border);
+  }
+  .wish-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .wish-text {
+    flex: 1;
+    font-size: 14px;
+    word-break: break-word;
+  }
+  .wish-delete {
+    background: none;
+    border: none;
+    color: var(--ornament-red);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px;
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+  .wish-delete:hover { opacity: 1; }
+
+  .wish-input-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .wish-input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--modal-border);
+    background: var(--input-bg);
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+  }
+  .wish-input:focus { border-color: var(--star-gold); }
+  .wish-input::placeholder { color: var(--text-muted); }
+  .wish-add-btn {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: none;
+    background: var(--tree-green);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  .wish-add-btn:hover { background: #1e8449; }
+
+  .empty-wish {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 20px;
+    font-size: 14px;
+  }
+  .empty-wish span {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  /* Ground / snow */
+  .ground {
+    height: 12px;
+    background: linear-gradient(180deg, rgba(232,240,255,0.15) 0%, transparent 100%);
+    max-width: 600px;
+    margin: 0 auto;
+    border-radius: 50%;
+  }
+
+  /* Loading */
+  .loading {
+    text-align: center;
+    padding: 60px 16px;
+    color: var(--text-muted);
+  }
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--modal-border);
+    border-top-color: var(--star-gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Back link */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+  .back-link:hover { color: var(--text); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .snowflake, .light-dot, .tree-star { animation: none !important; }
+    .ornament:hover { transform: scale(1.1); }
+  }
+
+  /* String lights along tree edges */
+  .garland {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1;
+  }
+</style>
+
+<div class="snowfall" id="snowfall"></div>
+
+<div style="position:relative;z-index:1">
+  <a class="back-link" href="/">← Back to Family Tree</a>
+
+  <div class="page-header">
+    <h1>🎄 Obeña Family Christmas Wishlist</h1>
+    <p>Tap a face to view & edit their wishlist!</p>
+  </div>
+
+  <div class="tree-scene">
+    <div class="tree-container">
+      <div class="tree-star">⭐</div>
+
+      <div class="tree-body" id="treeBody">
+        <div class="tree-section tree-section-1" id="tier1"></div>
+        <div class="tree-section tree-section-2" id="tier2"></div>
+        <div class="tree-section tree-section-3" id="tier3"></div>
+        <div class="tree-section tree-section-4" id="tier4"></div>
+      </div>
+
+      <div class="tree-trunk"></div>
+    </div>
+
+    <div class="ground"></div>
+    <div class="gifts-area" id="giftsArea"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <img class="modal-photo" id="modalPhoto" src="" alt="">
+    <h2 id="modalName"></h2>
+    <h3>🎁 Christmas Wishlist</h3>
+    <ul class="wishlist-items" id="wishlistItems"></ul>
+    <div class="wish-input-row">
+      <input class="wish-input" id="wishInput" type="text" placeholder="Add a wish..." maxlength="200">
+      <button class="wish-add-btn" id="wishAddBtn">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(async function() {
+  const GIFT_ICONS = ['🎁','🎀','🧸','🎮','📱','👟','📚','🎧','💝','🧣','⌚','🎂','🍫','🎪','🏀','👗','💻','🎸'];
+  const COLORS = ['color-0','color-1','color-2','color-3','color-4'];
+  const GIFT_COLORS = ['gift-color-0','gift-color-1','gift-color-2','gift-color-3'];
+
+  // Create snowflakes
+  const snowfall = document.getElementById('snowfall');
+  for (let i = 0; i < 40; i++) {
+    const s = document.createElement('div');
+    s.className = 'snowflake';
+    s.textContent = ['❄','❅','❆','•'][Math.floor(Math.random()*4)];
+    s.style.left = Math.random() * 100 + '%';
+    s.style.animationDuration = (4 + Math.random() * 6) + 's';
+    s.style.animationDelay = Math.random() * 8 + 's';
+    s.style.fontSize = (8 + Math.random() * 14) + 'px';
+    s.style.opacity = 0.2 + Math.random() * 0.5;
+    snowfall.appendChild(s);
+  }
+
+  // Fetch family data
+  let members = [];
+  try {
+    const res = await fetch('/api/data');
+    const data = await res.json();
+    const flat = [];
+    function flatten(list) {
+      for (const m of list) {
+        flat.push(m);
+        if (m.children) flatten(m.children);
+      }
+    }
+    flatten(data.members || []);
+    members = flat; // ALL members — those without photos get cute avatars
+  } catch(e) {
+    console.error('Failed to load family data:', e);
+  }
+
+  // ---- Vector avatars by age & sex ----
+  function ageOf(m) {
+    if (!m.birthDate) return 30;
+    const b = new Date(m.birthDate);
+    if (isNaN(b)) return 30;
+    return (Date.now() - b.getTime()) / (365.25 * 24 * 3600 * 1000);
+  }
+  function avatarFor(m) {
+    const age = ageOf(m);
+    const female = (m.sex || '').toLowerCase() === 'female';
+    const skin = '#ffd9b3', skin2 = '#f2c196';
+    let hair, hairShape, extra = '';
+    const hairColor = age >= 60 ? '#cfd4dc' : '#4a3321';
+    if (age < 5) { // baby
+      hairShape = `<path d="M50 22 q4 -10 10 -6 q-2 8 -8 10z" fill="${hairColor}"/>`;
+      extra = `<circle cx="50" cy="66" r="7" fill="#ff8fab"/><circle cx="50" cy="66" r="3.5" fill="#e85d82"/>`; // pacifier
+    } else if (female) {
+      hairShape = age < 13
+        ? `<path d="M22 46 q-4 -28 28 -30 q32 2 28 30 q-2 14 -6 16 l-2 -16 q-20 10 -40 0 l-2 16 q-4 -2 -6 -16z" fill="${hairColor}"/><circle cx="24" cy="50" r="6" fill="#ff6b9d"/><circle cx="76" cy="50" r="6" fill="#ff6b9d"/>`
+        : `<path d="M20 48 q-6 -32 30 -32 q36 0 30 32 q-1 22 -8 26 l-3 -24 q-19 9 -38 0 l-3 24 q-7 -4 -8 -26z" fill="${hairColor}"/>`;
+    } else {
+      hairShape = age < 13
+        ? `<path d="M26 38 q0 -20 24 -20 q24 0 24 20 l-4 4 q-20 -12 -40 0z" fill="${hairColor}"/>`
+        : `<path d="M25 40 q-2 -24 25 -24 q27 0 25 24 l-5 2 q-20 -14 -40 0z" fill="${hairColor}"/>`;
+      if (age >= 60) extra = `<path d="M38 70 q12 8 24 0 l0 6 q-12 8 -24 0z" fill="${hairColor}"/>`; // beard hint
+    }
+    const blush = `<circle cx="34" cy="56" r="4" fill="#ffb3c1" opacity="0.6"/><circle cx="66" cy="56" r="4" fill="#ffb3c1" opacity="0.6"/>`;
+    const shirt = female ? '#e91e8f' : '#2980b9';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <rect width="100" height="100" fill="#15233f"/>
+      <path d="M18 100 q0 -26 32 -26 q32 0 32 26z" fill="${shirt}"/>
+      <circle cx="50" cy="48" r="26" fill="${skin}"/>
+      <path d="M26 52 a26 26 0 0 0 48 0 a26 30 0 0 1 -48 0z" fill="${skin2}" opacity="0.5"/>
+      ${hairShape}
+      <circle cx="41" cy="48" r="2.8" fill="#2b1d12"/>
+      <circle cx="59" cy="48" r="2.8" fill="#2b1d12"/>
+      ${blush}
+      ${age < 5 ? '' : `<path d="M43 60 q7 6 14 0" stroke="#b5713f" stroke-width="2.5" fill="none" stroke-linecap="round"/>`}
+      ${extra}
+    </svg>`;
+    return 'data:image/svg+xml,' + encodeURIComponent(svg);
+  }
+  function photoOf(m) { return m.photo || avatarFor(m); }
+
+  // Wishlists stored via Vercel API
+  let wishlists = {}; // memberId -> [string]
+
+  function normalize(wData) {
+    const out = {};
+    for (const [id, items] of Object.entries(wData || {})) {
+      out[id] = items.map(i => typeof i === 'string' ? { text: i, id: '' } : i);
+    }
+    return out;
+  }
+  try {
+    const wRes = await fetch('/api/wishlist');
+    if (wRes.ok) wishlists = normalize(await wRes.json());
+  } catch(e) { console.error('Failed to load wishlists:', e); }
+
+  // Shuffle members for placement
+  const shuffled = [...members].sort(() => Math.random() - 0.5);
+
+  // Tree holds up to 34 ornaments (4+7+10+13); the rest become gifts under the tree
+  const TIER_CAPS = [4, 7, 10, 13];
+  const ornamentCount = Math.min(shuffled.length, TIER_CAPS.reduce((a,b)=>a+b,0));
+  const ornamentMembers = shuffled.slice(0, ornamentCount);
+  const giftMembers = shuffled.slice(ornamentCount);
+
+  // Distribute ornaments across tiers
+  let remaining = ornamentMembers.length;
+  const tiers = TIER_CAPS.map((cap, i) => {
+    const count = Math.min(cap, remaining);
+    remaining -= count;
+    return { el: document.getElementById('tier' + (i+1)), count };
+  });
+
+  let idx = 0;
+  tiers.forEach((tier, ti) => {
+    for (let i = 0; i < tier.count && idx < ornamentMembers.length; i++, idx++) {
+      const m = ornamentMembers[idx];
+      const wrap = document.createElement('div');
+      wrap.className = 'ornament-wrap';
+
+      const hook = document.createElement('div');
+      hook.className = 'ornament-hook';
+
+      const orb = document.createElement('div');
+      orb.className = 'ornament ' + COLORS[(idx) % COLORS.length];
+      const img = document.createElement('img');
+      img.src = photoOf(m);
+      img.alt = m.firstName;
+      img.loading = 'lazy';
+      orb.appendChild(img);
+      orb.onclick = () => openModal(m);
+
+      const name = document.createElement('div');
+      name.className = 'ornament-name';
+      name.textContent = m.firstName;
+
+      wrap.appendChild(hook);
+      wrap.appendChild(orb);
+      wrap.appendChild(name);
+      tier.el.appendChild(wrap);
+    }
+  });
+
+  // Place gifts
+  const giftsArea = document.getElementById('giftsArea');
+  giftMembers.forEach((m, i) => {
+    const box = document.createElement('div');
+    box.className = 'gift-box ' + GIFT_COLORS[i % GIFT_COLORS.length];
+    box.onclick = () => openModal(m);
+
+    const body = document.createElement('div');
+    body.className = 'gift-body';
+
+    const rv = document.createElement('div');
+    rv.className = 'gift-ribbon-v';
+    const rh = document.createElement('div');
+    rh.className = 'gift-ribbon-h';
+    body.appendChild(rv);
+    body.appendChild(rh);
+
+    const face = document.createElement('div');
+    face.className = 'gift-face';
+    const img = document.createElement('img');
+    img.src = photoOf(m);
+    img.alt = m.firstName;
+    img.loading = 'lazy';
+    face.appendChild(img);
+    body.appendChild(face);
+
+    const bow = document.createElement('div');
+    bow.className = 'gift-bow';
+    bow.textContent = '🎀';
+
+    const name = document.createElement('div');
+    name.className = 'gift-name';
+    name.textContent = m.firstName;
+
+    box.appendChild(bow);
+    box.appendChild(body);
+    box.appendChild(name);
+    giftsArea.appendChild(box);
+  });
+
+  // Modal logic
+  let currentMemberId = null;
+  const overlay = document.getElementById('modalOverlay');
+  const modal = document.getElementById('modal');
+  const modalPhoto = document.getElementById('modalPhoto');
+  const modalName = document.getElementById('modalName');
+  const wishlistItems = document.getElementById('wishlistItems');
+  const wishInput = document.getElementById('wishInput');
+  const wishAddBtn = document.getElementById('wishAddBtn');
+  const modalClose = document.getElementById('modalClose');
+
+  async function openModal(member) {
+    currentMemberId = member.id;
+    modalPhoto.src = photoOf(member);
+    modalName.textContent = member.firstName + ' ' + member.lastName;
+    renderWishlist();
+    overlay.hidden = false;
+    wishInput.value = '';
+
+    // Refresh wishlists from API
+    try {
+      const wRes = await fetch('/api/wishlist');
+      if (wRes.ok) {
+        wishlists = normalize(await wRes.json());
+        if (currentMemberId === member.id) renderWishlist();
+      }
+    } catch(e) {}
+  }
+
+  function closeModal() {
+    overlay.hidden = true;
+    currentMemberId = null;
+  }
+
+  modalClose.onclick = closeModal;
+  overlay.onclick = (e) => { if (e.target === overlay) closeModal(); };
+
+  function renderWishlist() {
+    const items = wishlists[currentMemberId] || [];
+    wishlistItems.innerHTML = '';
+    if (items.length === 0) {
+      wishlistItems.innerHTML = '<li class="empty-wish"><span>🎄</span>No wishes yet!<br>Add one below.</li>';
+      return;
+    }
+    items.forEach((wish, i) => {
+      const li = document.createElement('li');
+      li.className = 'wish-item';
+
+      const icon = document.createElement('span');
+      icon.className = 'wish-icon';
+      icon.textContent = GIFT_ICONS[i % GIFT_ICONS.length];
+
+      const text = document.createElement('span');
+      text.className = 'wish-text';
+      text.textContent = wish.text;
+
+      const del = document.createElement('button');
+      del.className = 'wish-delete';
+      del.textContent = '✕';
+      del.onclick = () => removeWish(wish.id, i);
+
+      li.appendChild(icon);
+      li.appendChild(text);
+      li.appendChild(del);
+      wishlistItems.appendChild(li);
+    });
+  }
+
+  async function addWish() {
+    const text = wishInput.value.trim();
+    if (!text || !currentMemberId) return;
+    if (!wishlists[currentMemberId]) wishlists[currentMemberId] = [];
+    wishlists[currentMemberId].push({ text, id: '' });
+    wishInput.value = '';
+    renderWishlist();
+    try {
+      const res = await fetch('/api/wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId: currentMemberId, item: text })
+      });
+      if (res.ok) {
+        wishlists = normalize(await res.json());
+        if (currentMemberId) renderWishlist();
+      }
+    } catch(e) { console.error('Save error:', e); }
+  }
+
+  async function removeWish(itemId, index) {
+    if (!currentMemberId) return;
+    const items = wishlists[currentMemberId] || [];
+    items.splice(index, 1);
+    renderWishlist();
+    if (!itemId) return;
+    try {
+      const res = await fetch('/api/wishlist', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ memberId: currentMemberId, itemId })
+      });
+      if (res.ok) {
+        wishlists = normalize(await res.json());
+        if (currentMemberId) renderWishlist();
+      }
+    } catch(e) { console.error('Delete error:', e); }
+  }
+
+  wishAddBtn.onclick = addWish;
+  wishInput.onkeydown = (e) => { if (e.key === 'Enter') addWish(); };
+
+  // Add twinkling lights
+  const treeBody = document.getElementById('treeBody');
+  const lightColors = ['#ff4444','#44ff44','#4444ff','#ffff44','#ff44ff','#44ffff'];
+  for (let i = 0; i < 30; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'light-dot';
+    dot.style.left = (10 + Math.random() * 80) + '%';
+    dot.style.top = (5 + Math.random() * 90) + '%';
+    dot.style.color = lightColors[Math.floor(Math.random() * lightColors.length)];
+    dot.style.background = 'currentColor';
+    dot.style.animationDelay = (Math.random() * 3) + 's';
+    treeBody.appendChild(dot);
+  }
+})();
+</script>
+</body></html>
