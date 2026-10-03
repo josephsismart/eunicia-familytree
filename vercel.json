@@ -1,6 +1,15 @@
 {
+  "framework": null,
+  "buildCommand": "echo no-build",
+  "outputDirectory": "public",
   "rewrites": [
-    { "source": "/christmas", "destination": "/christmas.html" },
-    { "source": "/((?!api|assets|christmas|favicon|og-).*)", "destination": "/index.html" }
+    {
+      "source": "/christmas",
+      "destination": "/christmas.html"
+    },
+    {
+      "source": "/((?!api|assets|christmas|favicon|og-).*)",
+      "destination": "/index.html"
+    }
   ]
 }
