@@ -1,6 +1,6 @@
 {
   "framework": null,
-  "buildCommand": "mkdir -p public/assets && B=https://nkd5whtm4tg13ugp.public.blob.vercel-storage.com && curl -sf -o public/assets/index-DLIuMIyO.js $B/assets/index-DLIuMIyO.js && curl -sf $B/assets/index-CvmYCU4o.css | sed \"s#$B/fa-#/assets/fa-#g\" > public/assets/index-CvmYCU4o.css && for f in fa-brands-400-Bs6tcqqs fa-regular-400-DRN8N0d1 fa-solid-900-IAB4Droh fa-v4compatibility-CErXDOsT; do curl -sf -o public/assets/$f.woff2 $B/$f.woff2; done && curl -sf -o public/favicon.svg $B/favicon.svg && curl -sf -o public/og-image.png $B/og-image.png",
+  "buildCommand": "sh build.sh",
   "outputDirectory": "public",
   "rewrites": [
     {
