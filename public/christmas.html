@@ -28,6 +28,17 @@
   .progress { display:inline-flex; align-items:center; gap:8px; margin-top:10px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); padding:6px 14px; border-radius:999px; font-size:13px; font-weight:700; }
   .progress b { color:#5ef08f; }
 
+  /* search */
+  .search { position:sticky; top:10px; z-index:50; backdrop-filter:blur(8px); background-color:rgba(20,32,70,.85) !important;
+    display:flex; align-items:center; gap:8px; max-width:340px; margin:12px auto 0; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); border-radius:999px; padding:8px 16px; }
+  .search:focus-within { border-color:var(--gold); box-shadow:0 0 0 3px rgba(255,213,74,.2); }
+  .search input { flex:1; min-width:0; background:none; border:none; outline:none; color:#fff; font:inherit; font-size:15px; }
+  .search input::placeholder { color:var(--muted); }
+  .s-count { font-size:12px; color:var(--muted); white-space:nowrap; }
+  .searching .orn:not(.match) { opacity:.18; filter:grayscale(1); }
+  .orn.match .ball { transform:scale(1.25); border-color:#fff !important; box-shadow:0 0 0 3px var(--gold), 0 0 22px 6px rgba(255,213,74,.85); }
+  .orn.match .nm { color:var(--gold); }
+
   /* ===== The tree ===== */
   .scene { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; padding:10px 8px 60px; }
   .star { font-size:58px; line-height:1; margin-bottom:-18px; z-index:6; position:relative; filter:drop-shadow(0 0 18px rgba(255,213,74,.95)); animation:starPulse 2.2s ease-in-out infinite; }
@@ -116,6 +127,11 @@
   <h1>🎄 Obeña Family Christmas Wishlist</h1>
   <p>Tap your face on the tree to add your wishes! ✨ Glowing + ✓ = wishlist ready</p>
   <div class="progress" id="progress">Loading…</div>
+</div>
+<div class="search">
+    <span class="s-ic">🔍</span>
+    <input id="q" type="search" placeholder="Find your name…" autocomplete="off" aria-label="Search family member">
+    <span class="s-count" id="qc"></span>
 </div>
 
 <div class="scene">
@@ -280,6 +296,26 @@
     }
   });
   refreshAll();
+
+  // ---- search ----
+  const q = document.getElementById('q'), qc = document.getElementById('qc'), scene = document.querySelector('.scene');
+  const fold = s => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  function doSearch(go) {
+    const t = fold(q.value.trim());
+    const hits = [];
+    for (const m of members) {
+      const el = els[m.id];
+      const ok = t && fold(m.firstName + ' ' + (m.middleName || '') + ' ' + (m.lastName || '')).includes(t);
+      el.classList.toggle('match', !!ok);
+      if (ok) hits.push(m);
+    }
+    scene.classList.toggle('searching', !!t);
+    qc.textContent = t ? (hits.length ? hits.length + ' found' : 'no match') : '';
+    if (hits.length) els[hits[0].id].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (go && hits.length === 1) openModal(hits[0]);
+  }
+  q.oninput = () => doSearch(false);
+  q.onkeydown = e => { if (e.key === 'Enter') doSearch(true); if (e.key === 'Escape') { q.value = ''; doSearch(false); } };
 
   // ---- modal ----
   let cur = null;
