@@ -260,7 +260,8 @@
   function refreshAll() { Object.keys(els).forEach(applyDone); updateProgress(); }
 
   // ---- place EVERY member on the tree (4 layers, bigger toward the bottom) ----
-  const list = [...members].sort(() => Math.random() - .5);
+  const bd = m => m.birthDate && !isNaN(new Date(m.birthDate)) ? new Date(m.birthDate).getTime() : Infinity;
+  const list = [...members].sort((a, b) => bd(a) - bd(b)); // eldest at top, youngest at bottom
   const n = list.length;
   const c1 = Math.round(n * .10), c2 = Math.round(n * .20), c3 = Math.round(n * .30);
   const groups = [list.slice(0, c1), list.slice(c1, c1 + c2), list.slice(c1 + c2, c1 + c2 + c3), list.slice(c1 + c2 + c3)];
@@ -273,7 +274,7 @@
       o.style.setProperty('--c', RING[k++ % RING.length]);
       o.title = m.firstName + ' ' + (m.lastName || '');
       o.innerHTML = `<div class="cap"></div><div class="ball"><img alt=""></div><div class="nm"></div><div class="chk">✓</div>`;
-      o.querySelector('img').src = avatar(m);
+      const im = o.querySelector('img'); im.onerror = () => { im.onerror = null; im.src = avatar(m); }; im.src = m.photo || avatar(m); im.style.objectFit = 'cover';
       o.querySelector('img').alt = m.firstName;
       o.querySelector('.nm').textContent = m.firstName;
       o.onclick = () => openModal(m);
@@ -335,7 +336,7 @@
   }
   async function openModal(m) {
     cur = m.id;
-    document.getElementById('mp').src = avatar(m);
+    const mp = document.getElementById('mp'); mp.onerror = () => { mp.onerror = null; mp.src = avatar(m); }; mp.src = m.photo || avatar(m); mp.style.objectFit = 'cover';
     document.getElementById('mn').textContent = m.firstName + ' ' + (m.lastName || '');
     win.value = '';
     render();
